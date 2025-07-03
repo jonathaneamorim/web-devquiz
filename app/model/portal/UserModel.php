@@ -1,12 +1,10 @@
 <?php
 
-namespace app\model;
-
-use config\Database;
+require_once __DIR__ . '/../Database.php';
 
 class UserModel {
-    private $db;
     private $table = 'usuario';
+    private $db;
 
     public function __construct() {
         $this->db = (new Database())->connect();
@@ -26,7 +24,20 @@ class UserModel {
         }
     }
 
-    // Adiciona uma nova tarefa
+    public function findById($id) {
+        try {
+            $stmt = $this->db->prepare("SELECT * FROM $this->table WHERE id = :id");
+            $stmt->bindParam(':id', $id);
+            $stmt->execute();
+    
+            return $stmt->fetch();
+
+        } catch(PDOException $e) {
+            error_log('Erro em ao encontrar usuário: ' . $e->getMessage());
+            return false;
+        }
+    }
+
     public function findUserByEmail($email) {
         try {
             $stmt = $this->db->prepare("SELECT * FROM $this->table WHERE email = :email");

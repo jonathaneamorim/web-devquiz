@@ -1,8 +1,7 @@
 <?php
 
-namespace app\controller;
-
-use app\model\User;
+require_once __DIR__ . '/../model/portal/UserModel.php';
+require_once __DIR__ . '/../utils/helpers.php';
 
 class AuthController {
 
@@ -12,19 +11,56 @@ class AuthController {
         $this->model = new UserModel();
     }
 
-    // Lista todas as tarefas
-    public function index() {
-        $tasks = $this->model->getAllTasks();
-        require_once __DIR__ . '/../views/tasks/index.php';
+    public function login() {
+        if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+            if(is_logged()) {
+                header('Location: /quiz');
+                exit;
+            }
+    
+            require_once __DIR__ . '/../views/login.php';
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $email = $_POST['email'];
+            $senha = $_POST['senha'];
+            $userFound = $this->model->findUserByEmail($email);
+    
+            if ($userFound) {
+                if(password_verify($senha, $userFound->senha)) {
+                    $_SESSION['usuario'] = [
+                        'id' => $userFound->id,
+                        'nome' => $userFound->nome,
+                        'email' => $userFound->email,
+                        'isAdmin' => $userFound->isAdmin
+                    ];
+    
+                    http_response_code(200);
+                    echo 'Usuário Logado!';
+                    exit;
+                } 
+    
+                http_response_code(401);
+                echo 'Senha Incorreta!';
+                exit;
+            }
+    
+            http_response_code(404);
+            echo 'Email de usuário não cadastrado!';
+            exit;
+        }
     }
 
-    // Exibe formulário de criação
-    public function create() {
-        require_once __DIR__ . '/../views/login.php';
-    }
+    public function register() {
+        if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+            if(is_logged()) {
+                header('Location: /quiz');
+                exit;
+            }
+    
+            require_once __DIR__ . '/../views/cadastro.php';
+        }
 
-    // Salva uma nova tarefa
-    public function store() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $nome = $_POST['nome'];
             $email = $_POST['email'];
@@ -38,8 +74,15 @@ class AuthController {
                 exit;
             }
 
+            if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                echo "Email inválido!";
+                http_response_code(400);
+                exit;
+            }
+
             if($this->model->addNewUser($nome, $email, $senha)) {
-                setUserSession();
+                $new_user = $this->model->findUserByEmail($email);
+                set_session($new_user->id, $new_user->nome, $new_user->email);
                 http_response_code(201);
                 echo 'Cadastro realizado com sucesso!';
                 exit;
@@ -51,24 +94,9 @@ class AuthController {
         }
     }
 
-    // Exibe formulário de edição
-    public function edit($id) {
-        // (Implemente a busca da tarefa por ID)
-        require_once __DIR__ . '/../views/tasks/edit.php';
-    }
-
-    // Atualiza uma tarefa
-    public function update($id) {
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $this->model->updateTask($id, $_POST['title'], $_POST['description']);
-            header('Location: /');
-        }
-    }
-
-    // Deleta uma tarefa
-    public function delete($id) {
-        $this->model->deleteTask($id);
-        header('Location: /');
+    public function logout() {
+        session_destroy();
+        header('Location: /login');
+        exit;
     }
 }
-?>
