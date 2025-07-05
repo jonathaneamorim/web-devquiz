@@ -1,13 +1,18 @@
 <?php
 
+require_once __DIR__ . '/../utils/helpers.php';
+
 class UserController {
-    private $model;
+    protected $user;
+    protected $quiz;
 
     public function __construct() {
-        $this->model = new UserModel();
+        $this->user = new UserModel();
+        $this->quiz = new QuizModel();
     }
 
     public function index() {
+        $quizzes = $this->quiz->getQuizzesByUser(get_session()['id']);
         if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             if(!is_logged()) {
                 header('Location: /login');
