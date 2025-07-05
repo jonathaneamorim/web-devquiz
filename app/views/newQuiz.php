@@ -8,6 +8,8 @@
 <body>
     <?php echo get_header(); ?>
 
+    <div id=mensagem-erro></div>
+
     <h2>Adicionar um novo quiz</h2>
     <form id="formNewQuiz">
         <label for="titulo">Titulo do quiz: </label><br>
@@ -25,17 +27,17 @@
                 url: '/quiz/new',
                 type: 'POST',
                 data: form.serialize(),
-                success: (data, xhr) => {
+                success: (data, textStatus, xhr) => {
+                    data = JSON.parse(data);
                     if(xhr.status === 201) {
-                        alert(data);
-                        window.location('/')
+                        alert(data.message);
+                        window.location.href = `/quiz/edit/${data.quizId}`;
                     } else {
-                        alert(xhr.status);
-                        alert('Erro ao inserir: ', data);
+                        $('#mensagem-erro').html(data);
                     }
                 },
-                error: (data) => {
-                    alert('Erro: ' . data);
+                error: (responseText) => {
+                    alert('Erro: ' + responseText);
                 }
             })
         });
