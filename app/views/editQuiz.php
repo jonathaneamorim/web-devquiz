@@ -1,5 +1,8 @@
 <?php 
     include_once __DIR__ . '/commons/default.php';
+
+    // Criar toasts de feedback pro usuário
+    // Aparece e some depois de x segundos
 ?>
 
 <!DOCTYPE html>
@@ -14,10 +17,10 @@
 
 <form id="formEditQuiz">
     <label for="titulo">Título do quiz:</label><br>
-    <input type="text" name="titulo" id="titulo" value="<?php echo htmlspecialchars($quiz->titulo); ?>"><br>
+    <input size="50" type="text" name="titulo" id="titulo" value="<?php echo htmlspecialchars($quiz->titulo); ?>"><br>
 
     <label for="descricao">Descrição do quiz:</label><br>
-    <input type="text" name="descricao" id="descricao" value="<?php echo htmlspecialchars($quiz->descricao); ?>"><br><br>
+    <input size="50" type="text" name="descricao" id="descricao" value="<?php echo htmlspecialchars($quiz->descricao); ?>"><br><br>
 
     <button type="submit">Salvar Alterações</button>
 </form>
@@ -26,7 +29,7 @@
 
 <div id="perguntas-container">
     <div id="lista-de-perguntas"></div>
-    <button type="button" id="btn-nova-pergunta">Nova pergunta +</button>
+    <button type="button" id="btnNovaPergunta">Nova pergunta +</button>
 </div>
 
 <script>
@@ -36,13 +39,33 @@
         getAllQuestions();
     });
 
-    $("#btn-nova-pergunta").on('click', () => {
+    $("#btnNovaPergunta").on('click', () => {
         addNewQuestion();
     });
 
+    $("#formEditQuiz").on('submit', function (e) {
+        e.preventDefault();
+        const form = $(this);
+        const data = form.serialize();
+        $.ajax({
+            url: `/quiz/edit/<?php echo htmlspecialchars($quiz->id) ?>`,
+            type: 'PUT',
+            data: data,
+            success: (data, textStatus, xhr) => {
+                if(xhr.status === 200) {
+                    $('#mensagem').html(`<p style="color: green">Quiz editado com sucesso!</p>`);
+                } else {
+                    $('#mensagem').html(`<p style="color: red">${xhr.responseText}</p>`);
+                }
+            },
+            error: (xhr) => {
+                $('#mensagem').html(`<p style="color: red">${xhr.responseText}</p>`);
+            }
+        })
+    })
+
     function addNewQuestion() {
         const novoFormulario = `
-        <form>
             <div class="pergunta-bloco" style="border: 1px solid black; padding: 15px; margin-top: 10px; border-radius: 5px;">
                 <h4>Nova Pergunta</h4>
 
@@ -65,10 +88,9 @@
 
                 <button type="button" class="btn-save-question">Salvar pergunta</button>
             </div>
-        </form>
         `;
         $('#lista-de-perguntas').append(novoFormulario);
-        $('#btn-nova-pergunta').hide();
+        $('#btnNovaPergunta').hide();
     }
 
     async function getAllQuestions() {
@@ -76,26 +98,32 @@
             $('#lista-de-perguntas').html('');
 
             const questions = await $.get(`/quiz/questions/<?php echo $quiz->id ?>`);
-            let content = '';
+            if(questions) {
+                let content = '';
+                for (const question of questions) {
+                    const answers = await getAnswers(question.id);
+                    let answersContent = '';
+                    let selectOptions = '';
+                    const letters = ['a', 'b', 'c', 'd'];
 
-            for (const question of questions) {
-                const answers = await getAnswers(question.id);
-                let answersContent = '';
-                let selectOptions = '';
-                const letters = ['a', 'b', 'c', 'd'];
+                    for (let i = 0; i < 4; i++) {
+                        const answer = answers[i] || {};
+                        answersContent += `
+                            <input id="${answer.id}" type="text" name="${letters[i]}" value="${answer.texto || ''}" size="25"><br>
+                        `;
 
-                for (let i = 0; i < 4; i++) {
-                    const answer = answers[i] || {};
-                    answersContent += `
-                        <input id="${answer.id}" type="text" name="${letters[i]}" value="${answer.texto || ''}" size="25"><br>
-                    `;
-                    selectOptions += `
-                        <option value="${answer.id || ''}">${letters[i].toUpperCase()}</option>
-                    `;
-                }
+                        if(question.resposta_certa_id === answer.id) {
+                            selectOptions += `
+                                <option value="${answer.id || ''}" selected>${letters[i].toUpperCase()}</option>
+                        `;
+                        } else {
+                            selectOptions += `
+                                <option value="${answer.id || ''}">${letters[i].toUpperCase()}</option>
+                            `;
+                        }
+                    }
 
-                content += `
-                    <form>
+                    content += `
                         <div class="pergunta-bloco" style="border: 1px solid black; padding: 15px; margin-top: 10px; border-radius: 5px;">
                             <h4>Pergunta</h4>
 
@@ -112,11 +140,11 @@
                             <button type="button" class="btn-save-question">Salvar pergunta</button>
                             <button type="button" class="btn-delete-question">Deletar pergunta</button>
                         </div>
-                    </form>
-                `;
-            }
+                    `;
+                }
 
-            $('#lista-de-perguntas').html(content);
+                $('#lista-de-perguntas').html(content);
+            }
         } catch (error) {
             console.error('Erro ao capturar questões: ', error);
         }
@@ -133,13 +161,14 @@
     }
 
     $(document).on('click', '.btn-save-question', function (e) {
-        // Pesquisar o que é o closest
-        const form = $(this).closest('form');
+        // https://developer.mozilla.org/en-US/docs/Web/API/Element/closest
+        // Método de Element que percorre o elemento e seus pais (indo em direção a raiz)
+        // até encontrar uma correspondencia
+        const form = $(this).closest('.pergunta-bloco');
         const questionId = form.find('input[name="question_id"]').val() || '';
         const isEdit = questionId ? true : false;
 
         const postData = {
-            quizId: <?php echo $quiz->id ?>,
             questionText: form.find('input[name="pergunta"]').val(),
             answer1: form.find('input[name="a"]').val(),
             answer2: form.find('input[name="b"]').val(),
@@ -172,14 +201,15 @@
         }
 
         $.ajax({
-            url: '/quiz/edit/<?php echo $quiz->id ?>',
+            // https://www.php.net/manual/en/function.htmlspecialchars.php 
+            url: '/quiz/edit/questions/<?php echo htmlspecialchars($quiz->id) ?>',
             type: isEdit ? 'PUT' : 'POST',
             data: isEdit ? putData : postData,
             success: (data, textStatus, xhr) => {
                 if (xhr.status === 201 || xhr.status === 200) {
                     $('#mensagem').html(`<p style="color: green">Pergunta salva com sucesso!</p>`);
                     getAllQuestions();
-                    $('#btn-nova-pergunta').show();
+                    $('#btnNovaPergunta').show();
                 } else {
                     $('#mensagem').html(`<p style="color: red">Deu erro: ${data}</p>`);
                 }
@@ -192,7 +222,7 @@
 
 
     $(document).on('click', '.btn-delete-question', function (e) {
-        const form = $(this).closest('form');
+        const form = $(this).closest('.pergunta-bloco');
         const questionId = form.find('input[name="question_id"]').val();
         $.ajax({
             url: `/quiz/question/delete/${questionId}`,
@@ -211,5 +241,8 @@
         });
     })
 </script>
+
+<?php echo get_scripts(); ?>
+
 </body>
 </html>

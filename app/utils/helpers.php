@@ -2,11 +2,12 @@
 
 require_once __DIR__ . '/../model/portal/UserModel.php';
 
-function set_session($userId, $nome, $email) {
+function set_session($userId, $nome, $email, $isAdmin) {
     $_SESSION['usuario'] = [
         'id' => $userId, 
         'nome' => $nome,
-        'email' => $email
+        'email' => $email,
+        'isAdmin' => $isAdmin
     ];
 }
 
@@ -30,9 +31,8 @@ function dd($var) {
     die();
 }
 
-function is_admin($id) {
-    $userFound = (new UserModel())->findById($id);
-    return $userFound->isAdmin;
+function is_admin() {
+    return $_SESSION['usuario']['isAdmin'];
 }
 
 // spl_autoload_register(function ($class) {

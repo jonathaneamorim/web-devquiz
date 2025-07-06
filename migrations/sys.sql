@@ -48,14 +48,14 @@ ADD CONSTRAINT fk_resposta_certa
 FOREIGN KEY (resposta_certa_id) REFERENCES resposta(id) ON DELETE SET NULL;
 
 -- Tabela de pontuação do usuário (PointBoard)
-CREATE TABLE `devquiz`.tabelaPontuacao (
+CREATE TABLE tabelaPontuacao (
     usuarioId CHAR(36) NOT NULL,
     quizId INT NOT NULL,
     acertos INT NOT NULL,
     total INT NOT NULL,
     porcentagemAcertos DECIMAL(5,2) GENERATED ALWAYS AS (acertos / total * 100) STORED,
     ultimaVezRespondido DATETIME DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (usuarioId, quizId),
+
     FOREIGN KEY (usuarioId) REFERENCES usuario(id) ON DELETE CASCADE,
     FOREIGN KEY (quizId) REFERENCES quiz(id) ON DELETE CASCADE
 );

@@ -2,11 +2,14 @@
 
 require_once __DIR__ . '/../Database.php';
 
+// stmt = statement ou declaração
+
 class QuizModel {
     
     protected $quizTable = 'quiz';
     protected $questionTable = 'pergunta';
     protected $answerTable = 'resposta';
+    protected $scoreTable = 'tabelaPontuacao';
     protected $db;
 
     public function __construct() {
@@ -63,6 +66,19 @@ class QuizModel {
         }
     }
 
+    public function putQuiz($quizId, $titulo, $descricao) {
+        try {
+            $stmt = $this->db->prepare("UPDATE $this->quizTable SET titulo = :newTitle, descricao = :newDescription WHERE id = :quizId");
+            $stmt->bindParam(':newTitle', $titulo);
+            $stmt->bindParam(':newDescription', $descricao);
+            $stmt->bindParam(':quizId', $quizId);
+            return $stmt->execute();
+        } catch (PDOException $e) {
+            error_log('Erro ao atualizar quiz: '. $e->getMessage());
+            return false;
+        }
+    }
+
     public function putQuestion($questionId, $textQuestion, $correctAnswerId) {
         try {
             $stmt = $this->db->prepare("UPDATE $this->questionTable SET texto = :textQuestion, resposta_certa_id = :correctAnswerId WHERE id = :questionId");
@@ -79,8 +95,7 @@ class QuizModel {
     public function putAnswer($questionId, $listAnswers) {
         try {
             foreach($listAnswers as $answer) {
-                $stmt = $this->db->prepare("UPDATE $this->questionTable SET texto = :textQuestion WHERE id = :answerId");
-                $stmt->bindParam(':questionId', $questionId);
+                $stmt = $this->db->prepare("UPDATE $this->answerTable SET texto = :textQuestion WHERE id = :answerId");
                 $stmt->bindParam(':textQuestion', $answer['text']);
                 $stmt->bindParam(':answerId', $answer['id']);
                 $stmt->execute();
@@ -175,6 +190,32 @@ class QuizModel {
             return $stmt->fetchAll();
         } catch(PDOException $e) {
             error_log('Erro ao receber respostas do quizzes: '. $e->getMessage());
+        }
+    }
+
+    public function setCorrectAnswer($questionId, $correctAnswerId) {
+        try {
+            $stmt = $this->db->prepare("UPDATE $this->questionTable SET resposta_certa_id = :correctAnswerId WHERE id = :questionId");
+            $stmt->bindParam(':correctAnswerId', $correctAnswerId);
+            $stmt->bindParam(':questionId', $questionId);
+            return $stmt->execute();
+        } catch (PDOException $e) {
+            error_log('Erro ao atualizar quiz: '. $e->getMessage());
+            return false;
+        }
+    }
+
+    public function newScore($userId, $quizId, $hits, $total) {
+        try {
+            $stmt = $this->db->prepare("INSERT INTO $this->scoreTable (usuarioId, quizId, acertos, total, ultimaVezRespondido) VALUES (:userId, :quizId, :hits, :total, NOW())");
+            $stmt->bindParam(':userId', $userId);
+            $stmt->bindParam(':quizId', $quizId);
+            $stmt->bindParam(':hits', $hits);
+            $stmt->bindParam(':total', $total);
+            return $stmt->execute();
+        } catch(PDOException $e) {
+            error_log('Erro ao inserir pontuação: '. print_r($stmt->errorInfo(), true));
+            return false;
         }
     }
 }

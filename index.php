@@ -15,7 +15,20 @@ $quizController = new QuizController();
 
 // fazer tratamento para remover a '/' do final caso houver
 // Pega a URI sem a query string (ex: /quiz/show de /quiz/show?page=2)
-$uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+
+// Se tiver muita rota, usar if-else fica poluído. 
+// switch-case com regex pode ajudar. 
+// Mas como ja tem o preg_match pontualmente, tá aceitável por enquanto.
+
+// Fontes:
+//      https://www.php.net/manual/pt_BR/function.preg-match.php
+//      https://developer.mozilla.org/pt-BR/docs/Web/HTTP/Reference/Status 
+//      https://stackoverflow.com/questions/9114565/jquery-appending-a-div-to-body-the-body-is-the-object 
+//      https://www.php.net/manual/pt_BR/function.rtrim.php  - rtrim — Retira espaços em branco (ou outros caracteres) do final de uma string
+
+// Remove a barra final com o rtrim
+$uri = rtrim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
+if ($uri === '') $uri = '/';
 
 if ($uri === '/') {
     header('Location: /login');
@@ -32,17 +45,20 @@ if ($uri === '/') {
 } elseif ($uri === '/quiz/show') {
     $quizController->getAllQuizzes();
 
+} elseif (preg_match('/^\/quiz\/show\/(\d+)$/', $uri, $matches)) {
+    $quizId = $matches[1];
+    $quizController->getQuizById($quizId);
+
 } elseif (preg_match('/^\/quiz\/edit\/(\d+)$/', $uri, $matches)) {
-    // O ID capturado estará em $matches[1]
     $id = $matches[1];
-    // Chama a função no controller, passando o ID
     $quizController->edit($id);
+
+}elseif (preg_match('/^\/quiz\/edit\/questions\/(\d+)$/', $uri, $matches)) {
+    $quizId = $matches[1];
+    $quizController->editQuestion($quizId);
 
 } elseif ($uri === '/quiz/new') {
     $quizController->new();
-
-} elseif ($uri === '/quiz/questions') {
-    // $quizController->new();
 
 } elseif (preg_match('/^\/quiz\/delete\/(\d+)$/', $uri, $matches)) {
     $quizId = $matches[1];
@@ -60,13 +76,26 @@ if ($uri === '/') {
     $questionId = $matches[1];
     $quizController->deleteQuestion($questionId);
 
-} elseif ($uri === '/perfil') {
+} elseif (preg_match('/^\/quiz\/responder\/(\d+)$/', $uri, $matches)) {
+    $quizId = $matches[1];
+    $quizController->answerQuiz($quizId);
+
+}elseif ($uri === '/perfil') {
     $userController->index();
+
+} elseif ($uri === '/perfil/data') {
+    $userController->getUserData();
+
+} elseif ($uri === '/perfil/edit/userdata') {
+    $userController->edit();
+
+}elseif ($uri === '/perfil/edit/password') {
+    $userController->updatePassword();
 
 } elseif ($uri === '/logout') {
     $authController->logout();
 
 } else {
     http_response_code(404);
-    echo "404 Not Found";
+    require_once __DIR__ . '/app/views/pageNotFound.php';
 }
