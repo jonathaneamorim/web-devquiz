@@ -27,6 +27,7 @@ class AuthController {
             $userFound = $this->model->findUserByEmail($email);
     
             if ($userFound) {
+                // https://www.php.net/manual/en/function.password-verify.php
                 if(password_verify($senha, $userFound->senha)) {
                     $_SESSION['usuario'] = [
                         'id' => $userFound->id,
