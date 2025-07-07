@@ -8,28 +8,41 @@
 <!DOCTYPE html>
 <html>
 <?php echo get_head('DevQuiz - Editar Quiz'); ?>
-<body>
+<body class="w-100 h-100 p-0 m-0">
 <?php echo get_header(); ?>
 
-<div id="mensagem"></div>
+    <div class="w-100 d-flex flex-column align-items-center mt-5 mb-5">
 
-<h2>Editar Quiz: <?php echo htmlspecialchars($quiz->titulo) ?></h2>
+        <div id="mensagem"></div>
+        
+        <div class="mb-3">
+            <h2>Editar Quiz: <?php echo htmlspecialchars($quiz->titulo) ?></h2>
+        </div>
 
-<form id="formEditQuiz">
-    <label for="titulo">Título do quiz:</label><br>
-    <input size="50" type="text" name="titulo" id="titulo" value="<?php echo htmlspecialchars($quiz->titulo); ?>"><br>
+        <div class="w-50 d-flex flex-column align-items-center">
+            <div class="border border-dark rounded-5 p-4 w-75">
+                <h3>Editar informações do quiz</h3>
 
-    <label for="descricao">Descrição do quiz:</label><br>
-    <input size="50" type="text" name="descricao" id="descricao" value="<?php echo htmlspecialchars($quiz->descricao); ?>"><br><br>
+                <form id="formEditQuiz">
+                    <label for="titulo">Título do quiz:</label><br>
+                    <input class="form-control" type="text" name="titulo" id="titulo" value="<?php echo htmlspecialchars($quiz->titulo); ?>">
 
-    <button type="submit">Salvar Alterações</button>
-</form>
+                    <label for="descricao" class="mt-3">Descrição do quiz:</label><br>
+                    <input class="form-control" type="text" name="descricao" id="descricao" value="<?php echo htmlspecialchars($quiz->descricao); ?>">
 
-<h3>Perguntas do Quiz</h3>
+                    <button type="submit" class="btn btn-secondary mt-3">Salvar Alterações</button>
+                </form>
+            </div>
+        </div>
+    </div>
 
-<div id="perguntas-container">
-    <div id="lista-de-perguntas"></div>
-    <button type="button" id="btnNovaPergunta">Nova pergunta +</button>
+<div class="w-100 d-flex flex-column align-items-center">
+    <h3>Perguntas do Quiz</h3>
+</div>
+
+<div id="perguntas-container" class="d-flex flex-column align-items-center mb-5">
+    <div id="lista-de-perguntas" class="w-100 d-flex flex-column align-items-center"></div>
+    <button type="button" id="btnNovaPergunta" class="btn btn-secondary mt-5">Nova pergunta +</button>
 </div>
 
 <script>
@@ -66,27 +79,35 @@
 
     function addNewQuestion() {
         const novoFormulario = `
-            <div class="pergunta-bloco" style="border: 1px solid black; padding: 15px; margin-top: 10px; border-radius: 5px;">
+            <div class="pergunta-bloco w-50 border border-dark rounded-5 p-4">
                 <h4>Nova Pergunta</h4>
 
-                <label><b>Enunciado:</b></label><br>
-                <input type="text" name="pergunta" placeholder="Digite o enunciado" size="50"><br><br>
+                <label><b>Enunciado:</b></label>
+                <input class="form-control border border-dark" type="text" name="pergunta" placeholder="Digite o enunciado">
 
-                <label><b>Respostas:</b></label><br>
-                <input type="text" name="a" placeholder="Resposta A" size="25"><br>
-                <input type="text" name="b" placeholder="Resposta B" size="25"><br>
-                <input type="text" name="c" placeholder="Resposta C" size="25"><br>
-                <input type="text" name="d" placeholder="Resposta D" size="25"><br><br>
+                <div class="mt-5 p-3 border border-dark rounded-2">
+                    <h3>Respostas</h3>
+                    <label for="a">A: </label>
+                    <input class="form-control border border-dark" type="text" name="a" placeholder="Resposta A">
+                    <label for="b">B: </label>
+                    <input class="form-control border border-dark" type="text" name="b" placeholder="Resposta B">
+                    <label for="c">C: </label>
+                    <input class="form-control border border-dark" type="text" name="c" placeholder="Resposta C">
+                    <label for="d">D: </label>
+                    <input class="form-control border border-dark" type="text" name="d" placeholder="Resposta D">
+                </div>
 
-                <label><b>Resposta Correta:</b></label>
-                <select name="resposta_correta">
-                    <option value="a">A</option>
-                    <option value="b">B</option>
-                    <option value="c">C</option>
-                    <option value="d">D</option>
-                </select><br><br>
+                <div class="mb-3 mt-3">
+                    <label><b>Resposta Correta:</b></label>
+                    <select name="resposta_correta" class="form-select w-25 border border-dark">
+                        <option value="a">A</option>
+                        <option value="b">B</option>
+                        <option value="c">C</option>
+                        <option value="d">D</option>
+                    </select>
+                </div>
 
-                <button type="button" class="btn-save-question">Salvar pergunta</button>
+                <button type="button" class="btn-save-question btn btn-secondary">Salvar pergunta</button>
             </div>
         `;
         $('#lista-de-perguntas').append(novoFormulario);
@@ -109,7 +130,10 @@
                     for (let i = 0; i < 4; i++) {
                         const answer = answers[i] || {};
                         answersContent += `
-                            <input id="${answer.id}" type="text" name="${letters[i]}" value="${answer.texto || ''}" size="25"><br>
+                            <div class="form-group">
+                                <label for="${letters[i]}">${letters[i].toUpperCase()}:</label>
+                                <input class="form-control border border-dark" id="${answer.id}" type="text" name="${letters[i]}" value="${answer.texto || ''}" size="25">
+                            </div>
                         `;
 
                         if(question.resposta_certa_id === answer.id) {
@@ -124,21 +148,25 @@
                     }
 
                     content += `
-                        <div class="pergunta-bloco" style="border: 1px solid black; padding: 15px; margin-top: 10px; border-radius: 5px;">
+                        <div class="pergunta-bloco w-50 border border-dark rounded-5 p-4 mb-3">
                             <h4>Pergunta</h4>
 
-                            <label><b>Enunciado:</b></label><br>
-                            <input type="text" name="pergunta" size="50" value="${question.texto || ''}">
-                            <input type="hidden" name="question_id" value="${question.id}"><br><br>
+                            <label><b>Enunciado:</b></label>
+                            <input class="form-control border border-dark" type="text" name="pergunta" value="${question.texto || ''}">
+                            <input type="hidden" name="question_id" value="${question.id}">
 
-                            <label><b>Respostas:</b></label><br>
-                            ${answersContent}<br>
+                            <div class="mt-5 p-3 border border-dark rounded-2">
+                                <h3>Respostas:</h3>
+                                ${answersContent}
+                            </div>
 
-                            <label><b>Resposta Correta:</b></label>
-                            <select name="resposta_correta">${selectOptions}</select><br><br>
+                            <div class="mb-3 mt-3">
+                                <label><b>Resposta Correta:</b></label>
+                                <select name="resposta_correta" class="form-select w-25 border border-dark" aria-label="respostas">${selectOptions}</select>
+                            </div>
 
-                            <button type="button" class="btn-save-question">Salvar pergunta</button>
-                            <button type="button" class="btn-delete-question">Deletar pergunta</button>
+                            <button type="button" class="btn-save-question btn btn-secondary">Salvar pergunta</button>
+                            <button type="button" class="btn-delete-question btn btn-secondary">Deletar pergunta</button>
                         </div>
                     `;
                 }
@@ -239,6 +267,10 @@
                 $('#mensagem').html(`<p style="color: red">Erro: ${xhr.responseText}</p>`);
             }
         });
+    })
+
+    $(document).on('focusin', 'input, select', function(e) {
+        $('#mensagem').html('');
     })
 </script>
 

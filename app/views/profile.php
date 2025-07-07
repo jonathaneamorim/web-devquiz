@@ -1,6 +1,21 @@
 <?php 
     include_once __DIR__ . '/commons/default.php';
     include_once __DIR__ . '/../utils/helpers.php';
+
+    // https://pt.stackoverflow.com/questions/103157/qual-%C3%A9-a-diferen%C3%A7a-entre-x-www-form-urlencoded-e-form-data
+    // https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Methods/POST
+    // Tipos de corpos de requisição application/x-www-form-urlencoded | multipart/form-data
+    // application/x-www-form-urlencoded = campo1=valor1&campo2=valor2
+    // multipart/form-data = Enviar arquivos + dados
+    // Pesquisar
+
+     // Criar um update pro usuario
+    /*
+        Fontes: https://api.jquery.com/serialize/
+    */
+
+    // https://stackoverflow.com/questions/16493280/close-bootstrap-modal
+    // https://stackoverflow.com/questions/6653556/jquery-javascript-function-to-clear-all-the-fields-of-a-form
 ?>
 
 <!DOCTYPE html>
@@ -9,21 +24,22 @@
 <body>
     <?php echo get_header(); ?>
 
-
-
-    <div>
-        <p>Nome: <span id="userName"></span></p>
-        <p>Email: <span id="userEmail"></span></p>
+    <div class="w-100 d-flex flex-column align-items-center mt-5">
+        <div class="border border-dark rounded-5 p-4">
+            <div class="mb-3">
+                <h2>Informações de usuário </h2>
+            </div>
+            <div>
+                <p>Nome: <span id="userName"></span></p>
+                <p>Email: <span id="userEmail"></span></p>
+            </div>
+            <div class="d-flex gap-3">
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalEditUser">Editar</button>
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalAlterPassword">Alterar senha</button>
+            </div>
+        </div>
     </div>
 
-            <!-- Button trigger modal -->
-        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalEditUser">
-        Editar
-        </button>
-
-        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalAlterPassword">
-        Alterar senha
-        </button>
 
         <div class="modal fade" id="modalEditUser" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="modalEditUserLabel">
             <div class="modal-dialog modal-dialog-centered">
@@ -77,18 +93,11 @@
             </div>
         </div>
         </div>
-
-        <hr>
         
     <div id="message"></div>
     <div id="quizList"></div>
 
     <script>
-        // Criar um update pro usuario
-        /*
-            Fontes: https://api.jquery.com/serialize/
-        */
-
         $(document).ready(function() {
             updateUserData();
         });
@@ -112,12 +121,6 @@
             }
         }
 
-        // https://pt.stackoverflow.com/questions/103157/qual-%C3%A9-a-diferen%C3%A7a-entre-x-www-form-urlencoded-e-form-data
-        // https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Methods/POST
-        // Tipos de corpos de requisição application/x-www-form-urlencoded | multipart/form-data
-        // application/x-www-form-urlencoded = campo1=valor1&campo2=valor2
-        // multipart/form-data = Enviar arquivos + dados
-        // Pesquisar
         $('#formAlterPassword').on('submit', function(e) {
             e.preventDefault();
             const form = $(this);
@@ -133,7 +136,6 @@
                     success: (data, textStatus, xhr) => {
                         if(xhr.status === 200) {
                             $('#modalAlterPassword').modal('toggle'); 
-                            // https://stackoverflow.com/questions/6653556/jquery-javascript-function-to-clear-all-the-fields-of-a-form
                             $(this).trigger("reset");
                         } else {
                             $('#editPasswordMessage').html(`<p style="color: red">${data}</p>`);
@@ -158,9 +160,7 @@
                 success: (data, textStatus, xhr) => {
                     if(xhr.status === 200) {
                         updateUserData();
-                        // https://stackoverflow.com/questions/16493280/close-bootstrap-modal
                         $('#modalEditUser').modal('toggle'); 
-                        // https://stackoverflow.com/questions/6653556/jquery-javascript-function-to-clear-all-the-fields-of-a-form
                         $(this).trigger("reset");
                     } else {
                         $('#editUserMessage').html(`<p style="color: red">${data}</p>`);
@@ -171,83 +171,6 @@
                 },
             });
         });
-
-
-        <?php if(is_admin()) { ?>
-            /*
-             beforeSend: function (xhr) {
-                console.log('Loading more posts...')
-                button.text('Loading');
-            }
-            */
-
-            $(document).ready(function() {
-                listarQuizzesUsuario();
-            });
-
-            function listarQuizzesUsuario() {
-                $("#quizList").html('');
-                let list = '';
-                $.ajax({
-                    url: '/quiz/show',
-                    type: 'GET',
-                    dataType: 'json',
-                    /*
-                        Fontes: 
-                            https://stackoverflow.com/questions/7638847/understanding-jquerys-jqxhr
-                            https://www.sitepoint.com/jqxhr-object/
-                        data: resposta do servidor
-                        textStatus: string com o status ("success" ou "error")
-                        xhr: objeto XMLHttpRequest com status, headers, etc.
-                    */
-                    success: (data, textStatus, xhr) => {
-                        if(xhr.status === 200) {
-                            $('#quizList').append('<div><h2>Lista de quizzes cadastrados</h2></div>');
-                            data.forEach(quiz => {
-                            let item = `
-                                <div style="border: 1px solid black">
-                                    <h2>${quiz.titulo}</h2>
-                                    <p>${quiz.descricao}</p>
-                                    <button><a href="/quiz/edit/${quiz.id}">Editar Quiz</a></button>
-                                    <button class="btn-delete" value="${quiz.id}">Deletar</button>
-                                </div>
-                                `;
-                            list += item;
-                            });
-                            $('#quizList').append(list);
-                        } else if(xhr.status === 204) {
-                            // 204 não retorna data
-                            $('#quizList').html(`<div><h2>Sem quizzes cadastrados!</h2></div>`);
-                        }
-                    },
-                    /*
-                        xhr: objeto XMLHttpRequest
-                        textStatus: string com o tipo do erro ("timeout", "error", "abort", etc)
-                        errorThrown: mensagem do erro (string ou null) - Exceção tratada
-                    */
-                    error: (xhr, textStatus, errorThrown) => {
-                        $('#quizList').html(`Error: ${errorThrown}`);
-                    }
-                })
-            };
-
-            $(document).on('click', '.btn-delete', function () {
-                const id = $(this).val();
-                $.ajax({
-                    url: `/quiz/delete/${id}`,
-                    type: 'DELETE',
-                    success: (data, status) => {
-                        alert(data);
-                        listarQuizzesUsuario();
-                    },  
-                    error: (status, error) => {
-                        $('#message').html('<p style="color: red">Erro ao deletar quiz!</p>');
-                        console.error('Erro na requisição:', status, error);
-                    }
-                });
-            });
-
-           <?php } ?>
 
     </script>
     <?php echo get_scripts(); ?>

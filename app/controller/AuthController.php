@@ -37,7 +37,7 @@ class AuthController {
                     ];
     
                     http_response_code(200);
-                    echo 'Usuário Logado!';
+                    echo json_encode(['message' => 'Usuario logado!']);
                     exit;
                 } 
     
@@ -65,7 +65,22 @@ class AuthController {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $nome = $_POST['nome'];
             $email = $_POST['email'];
-            $senha = password_hash($_POST['senha'], PASSWORD_DEFAULT);
+
+            $nameRegex = '/^.{5,}$/';
+
+            // https://www.php.net/manual/en/function.preg-match.php 
+            if(!preg_match($nameRegex, $nome)) {
+                echo 'O nome precisa ter 5 caracteres ou mais!';
+                http_response_code(400);
+                exit;
+            }
+
+            // https://www.php.net/manual/pt_BR/function.filter-var.php 
+            if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                echo 'Email com formato inválido!';
+                http_response_code(400);
+                exit;
+            }
 
             $userExists = $this->model->findUserByEmail($email);
 
@@ -75,17 +90,29 @@ class AuthController {
                 exit;
             }
 
-            if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-                echo "Email inválido!";
+            $passwordRegex = "/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/";
+            // (?=.*[a-z]) - pelo menos uma letra minúscula
+            // (?=.*[A-Z]) - pelo menos uma letra maiúscula
+            // (?=.*\d) - pelo menos um número
+            // (?=.*[\W_]) - pelo menos um caractere especial (qualquer símbolo que não seja letra ou número)
+            // .{8,} - mínimo de 8 caracteres
+
+            if(!preg_match($passwordRegex, $_POST['senha'])) {
                 http_response_code(400);
+                echo 'A senha deve conter letra minúscula e maiúscula, número, caractere especial e deve conter 8 caracteres ou mais';
                 exit;
             }
 
-            if($this->model->addNewUser($nome, $email, $senha)) {
+            $senha = password_hash($_POST['senha'], PASSWORD_DEFAULT);
+
+
+            $addNewUser = $this->model->addNewUser($nome, $email, $senha);
+
+            if($addNewUser) {
                 $new_user = $this->model->findUserByEmail($email);
-                set_session($new_user->id, $new_user->nome, $new_user->email);
+                set_session($new_user->id, $new_user->nome, $new_user->email, $new_user->isAdmin);
                 http_response_code(201);
-                echo 'Cadastro realizado com sucesso!';
+                echo json_encode(['message' => 'Cadastro realizado com sucesso!']);
                 exit;
             } else {
                 http_response_code(400);

@@ -8,7 +8,7 @@
 <body>
     <?php echo get_header(); ?>
 
-    <section>
+    <section class="w-100 d-flex flex-column align-items-center mt-5 mb-5">
         <div>
             <h2 id="quizTitle"></h2>
             <p id="quizDescription"></p>
@@ -70,15 +70,15 @@
                     }
 
                     content += `
-                        <div class="w-50 p-3" style="border: 1px solid black">
+                        <div class="w-50 p-3 border border-dark rounded-5 p-3">
                             <h3 id="${question.id}">${question.texto}</h3>
 
                             <div>
                                 ${answersContent}
                             </div>
 
-                            <label><b>Resposta:</b></label>
-                            <select name="resposta">${selectContent}</select><br>
+                            <label>Resposta:</label>
+                            <select name="resposta" class="form-select w-25 border border-dark">${selectContent}</select><br>
 
                         </div>
                     `;

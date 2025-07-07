@@ -60,10 +60,6 @@ if ($uri === '/') {
 } elseif ($uri === '/quiz/new') {
     $quizController->new();
 
-} elseif (preg_match('/^\/quiz\/delete\/(\d+)$/', $uri, $matches)) {
-    $quizId = $matches[1];
-    $quizController->delete($quizId);
-
 } elseif (preg_match('/^\/quiz\/answer\/(\d+)$/', $uri, $matches)) {
     $perguntaId = $matches[1];
     $quizController->getAnswer($perguntaId);
