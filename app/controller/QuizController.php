@@ -72,8 +72,6 @@ class QuizController {
                 header('Content-Type: application/json');
                 http_response_code(200);
                 echo json_encode($quizzes);
-            } else {
-                http_response_code(204);
             }
         } catch(Exception $e) {
             error_log('Erro ao capturar quizzes!: ' . $e);
@@ -278,6 +276,19 @@ class QuizController {
                 exit;
             }
         }
+
+        if ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
+            try {
+                $deleted = $this->quiz->deleteQuiz($quizId);
+                if($deleted) {
+                    http_response_code(200);
+                    echo 'Quiz deletado com sucesso!';
+                }
+            } catch(Exception $e) {
+                error_log('Erro ao remover quiz!: ' . $e);
+            }
+        }
+
     }
 
     // Mudar o nome disso kkkk
@@ -341,19 +352,19 @@ class QuizController {
         }
     }
 
-    public function delete($id) {
-        if ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
-            try {
-                $deleted = $this->quiz->deleteQuiz($id);
-                if($deleted) {
-                    http_response_code(200);
-                    echo 'Quiz deletado com sucesso!';
-                }
-            } catch(Exception $e) {
-                error_log('Erro ao remover quiz!: ' . $e);
-            }
-        }
-    }
+    // public function delete($id) {
+    //     if ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
+    //         try {
+    //             $deleted = $this->quiz->deleteQuiz($id);
+    //             if($deleted) {
+    //                 http_response_code(200);
+    //                 echo 'Quiz deletado com sucesso!';
+    //             }
+    //         } catch(Exception $e) {
+    //             error_log('Erro ao remover quiz!: ' . $e);
+    //         }
+    //     }
+    // }
 
 
     public function answerQuiz($quizId) {

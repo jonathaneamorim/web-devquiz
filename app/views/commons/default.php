@@ -21,74 +21,76 @@ function get_scripts() {
     ';
 }
 
-// Separar strings da lógica
 function get_header() {
+    $notLogged = '
+            <li>
+                <a href="/login" class="text-decoration-none text-black fs-5">Login</a>
+            </li>
+            <li>
+                <a href="/register" class="text-decoration-none text-black fs-5">Cadastro</a>
+            </li>
+    ';
+
+    $is_admin = '
+            <li>
+                <a href="/quiz" class="text-decoration-none text-black fs-5">Lobby</a>
+            </li>
+            <li>
+                <a href="/perfil" class="text-decoration-none text-black fs-5">Perfil</a>
+            </li>
+            <li>
+                <a href="/quiz/new" class="text-decoration-none text-black fs-5">Criar um quiz</a>
+            </li>
+            <li>
+                <a href="/logout" class="text-decoration-none text-black fs-5">Sair</a>
+            </li>
+    ';
+
+    $defaultUser = '
+            <li>
+                <a href="/quiz" class="text-decoration-none text-black fs-5">Lobby</a>
+            </li>
+            <li>
+                <a href="/perfil" class="text-decoration-none text-black fs-5">Perfil</a>
+            </li>
+            <li>
+                <a href="/logout" class="text-decoration-none text-black fs-5">Sair</a>
+            </li>
+    ';
+
+    $content = '
+        <header style="height: 8vh; width: 100vw;">
+            <nav style="display: flex; justify-content: space-between;">
+                <div style="margin-left: 60px ;">
+                    <h1>DevQuiz</h1>
+                </div>
+            </nav>
+        </header>
+    ';
+
     if(!is_logged()) {
-        return '
-            <header style="height: 8vh; width: 100vw;">
-                <nav style="display: flex; justify-content: space-between;">
-                    <div style="margin-left: 60px ;">
-                        <h1>DevQuiz</h1>
-                    </div>
-                    <div style="display: flex; margin-right: 60px; align-items: center; gap: 10px;">
-                        <div>
-                            <a href="/login">login</a>
-                        </div>
-                        <div>
-                            <a href="/register">cadastro</a>
-                        </div>
-                    </div>
-                </nav>
-            </header>
-        ';
-        exit();
-    } else {
-        $is_admin = is_admin();
-        if($is_admin) {
-            return '
-                <header style="height: 8vh; width: 100vw;">
-                    <nav style="display: flex; justify-content: space-between;">
-                        <div style="margin-left: 60px ;">
-                            <h1>DevQuiz</h1>
-                        </div>
-                        <div style="display: flex; margin-right: 60px; align-items: center; gap: 10px;">
-                            <div>
-                                <a href="/quiz">Lobby</a>
-                            </div>
-                            <div>
-                                <a href="/perfil">Perfil</a>
-                            </div>
-                            <div>
-                                <a href="/quiz/new">Criar um quiz</a>
-                            </div>
-                            <div>
-                                <a href="/logout">Sair</a>
-                            </div>
-                        </div>
-                    </nav>
-                </header>
-            ';
-        } else {
-            return '
-                <header style="height: 8vh; width: 100vw;">
-                    <nav style="display: flex; justify-content: space-between;">
-                        <div style="margin-left: 60px ;">
-                            <h1>DevQuiz</h1>
-                        </div>
-                        <div style="display: flex; margin-right: 60px; align-items: center; gap: 10px;">
-                            <div>
-                                <a href="/quiz">Lobby</a>
-                            </div>
-                            <div>
-                                <a href="/perfil">Perfil</a>
-                            </div>
-                            <div>
-                                <a href="/logout">Sair</a>
-                            </div>
-                        </div>
-                    </nav>
-                </header>
-            ';
-        }
+        $navContent = $notLogged;
+    }  else {
+        $navContent = is_admin() ? $is_admin : $defaultUser;
     }
+
+    $content = '
+        <header style="height: 10vh;" class="w-100 border-bottom border-dark">
+            <nav class="d-flex justify-content-around align-items-center h-100">
+                <div class="">
+                    <a href="/quiz" class="text-decoration-none text-black">
+                        <h1>DevQuiz</h1>
+                    </a>
+                </div>
+
+                <div class="">
+                    <ul class="list-unstyled p-0 m-0 d-flex gap-4">
+                        ' . $navContent . '
+                    </ul>
+                </div>
+            </nav>
+        </header>
+    ';
+
+    return $content;
 }
