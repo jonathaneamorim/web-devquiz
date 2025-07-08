@@ -13,17 +13,17 @@
             <h2 id="quizTitle"></h2>
             <p id="quizDescription"></p>
         </div>
+        <a href="#finish" class="btn btn-primary">Finalizar quiz</a>
     </section>
 
     <div id="mensagem"></div>
 
-    <div id="questions" class="d-flex flex-column w-100 align-items-center">
+    <div id="questions" class="d-flex flex-column w-100 align-items-center"></div>
 
-    </div>
-
-    <div class="d-flex m-3 justify-content-center">
+    <div class="d-flex m-5 justify-content-center">
         <button id="finish" class="btn btn-primary">Finalizar e enviar</button>
     </div>
+
     
     <script> 
 
@@ -48,7 +48,8 @@
             
             // Render quiz Questions
             if(questions) {
-                for (const question of questions) {
+                const shuffledQuestions = shuffle(questions);
+                for (const question of shuffledQuestions) {
                     const answers = await getAnswers(question.id);
                     let answersContent = '';
                     let selectContent = '';
@@ -70,7 +71,7 @@
                     }
 
                     content += `
-                        <div class="w-50 p-3 border border-dark rounded-5 p-3">
+                        <div class="w-50 p-3 border border-dark rounded-5 p-3 mb-5">
                             <h3 id="${question.id}">${question.texto}</h3>
 
                             <div>

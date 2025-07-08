@@ -40,9 +40,17 @@ class QuizController {
             try {
                 $titulo = $_POST['titulo'];
                 $descricao = $_POST['descricao'];
+
+                if(!$titulo || !$descricao) {
+                    http_response_code(400);
+                    echo 'Titulo ou descrições vazias!';
+                    exit;
+                }
+
                 $userId = get_session()['id'];
     
                 $newQuizId = $this->quiz->newQuiz($titulo, $descricao, $userId);
+                
                 if($newQuizId) {
                     http_response_code(201);
                     $response = [
@@ -72,6 +80,7 @@ class QuizController {
                 header('Content-Type: application/json');
                 http_response_code(200);
                 echo json_encode($quizzes);
+                exit;
             }
         } catch(Exception $e) {
             error_log('Erro ao capturar quizzes!: ' . $e);
@@ -85,11 +94,16 @@ class QuizController {
                 header('Content-Type: application/json');
                 http_response_code(200);
                 echo json_encode($quiz);
+                exit;
             } else {
                 http_response_code(204);
+                exit;
             }
         } catch(Exception $e) {
             error_log('Erro ao capturar quizzes!: ' . $e);
+            http_response_code(400);
+            echo 'Erro interno do servidor';
+            die;
         }
     }
 
@@ -254,6 +268,13 @@ class QuizController {
             try {
                 $titulo = $put_vars['titulo'];
                 $descricao = $put_vars['descricao'];
+
+                if(!$titulo || !$descricao) {
+                    http_response_code(400);
+                    echo 'Titulo ou descrições vazias!';
+                    exit;
+                }
+
                 $currentQuiz = $this->quiz->getQuizById($quizId);
                 if(
                     !($titulo === $currentQuiz->titulo) ||
@@ -409,6 +430,8 @@ class QuizController {
                 }
                 
                 $percentage = ($userScore / $totalQuestions) * 100;
+
+                $percentage = number_format($percentage, 2);
                 
                 $userId = get_session()['id'];
 

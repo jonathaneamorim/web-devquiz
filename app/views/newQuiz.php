@@ -32,16 +32,16 @@
                 type: 'POST',
                 data: form.serialize(),
                 success: (data, textStatus, xhr) => {
-                    data = JSON.parse(data);
                     if(xhr.status === 201) {
+                        data = JSON.parse(data);
                         alert(data.message);
                         window.location.href = `/quiz/edit/${data.quizId}`;
                     } else {
                         $('#mensagem-erro').html(data);
                     }
                 },
-                error: (responseText) => {
-                    alert('Erro: ' + responseText);
+                error: (xhr) => {
+                    alert('Erro: ' + xhr.responseText);
                 }
             })
         });

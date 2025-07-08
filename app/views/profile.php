@@ -51,10 +51,10 @@
                 <div class="modal-body">
                     <div id="editUserMessage"></div>
                     <form id="formEditUser">
-                        <label for="email">Email: </label>
-                        <input id="editUserEmailInput" type="email" name="email" placeholder="Email" autocomplete="email" required><br><br>
                         <label for="nome">Nome: </label>
-                        <input id="editUserNameInput"  type="text" name="nome" placeholder="Nome" required><br><br>
+                        <input class="form-control mb-3" id="editUserNameInput"  type="text" name="nome" placeholder="Nome" required>
+                        <label for="email">Email: </label>
+                        <input class="form-control mb-3" id="editUserEmailInput" type="email" name="email" placeholder="Email" autocomplete="email" required>
                         <button type="submit" class="btn btn-primary">Alterar</button>
                     </form>
                 </div>
@@ -76,13 +76,13 @@
                 <div id="editPasswordMessage"></div>
                 <form id="formAlterPassword">
                     <label for="currentPassword">Senha atual: </label><br>
-                    <input type="password" name="currentPassword" placeholder="Senha atual" autocomplete="current-password" required><br><br>
+                    <input class="form-control mb-3" type="password" name="currentPassword" placeholder="Senha atual" autocomplete="current-password" required>
                     
                     <label for="newPassword">Nova senha: </label><br>
-                    <input type="password" name="newPassword" placeholder="Nova senha" required><br><br>
+                    <input class="form-control mb-3" type="password" name="newPassword" placeholder="Nova senha" required>
                     
                     <label for="confirmNewPassword">Confirmar nova senha: </label><br>
-                    <input type="password" name="confirmNewPassword" placeholder="Confirme a nova senha" required><br><br>
+                    <input class="form-control mb-3" type="password" name="confirmNewPassword" placeholder="Confirme a nova senha" required>
                     
                     <button type="submit" class="btn btn-primary">Alterar</button>
                 </form>
@@ -95,11 +95,25 @@
         </div>
         
     <div id="message"></div>
-    <div id="quizList"></div>
+    <div class="p-5">
+        <div class="p-5 d-flex flex-column align-items-center">
+            <table class="table border border-dark w-50">
+                <thead>
+                    <tr>
+                        <th scope="col">Quiz</th>
+                        <th scope="col">Pontuação</th>
+                        <th scope="col">Data respondida</th>
+                    </tr>
+                </thead>
+                    <tbody id="userScore"></tbody>
+            </table>
+        </div>
+    </div>
 
     <script>
         $(document).ready(function() {
             updateUserData();
+            renderUserScore();
         });
 
         async function updateUserData() {
@@ -119,6 +133,33 @@
                 console.error('Erro ao capturar os dados do usuário: ', error);
                 return {};
             }
+        }
+
+        async function getUserScore() {
+            try {
+                const response = await $.get('/perfil/userscore');
+                return response || [];
+            } catch (error) {
+                console.error('Erro ao capturar pontuação do usuário: ', error);
+                return [];
+            }
+        }
+
+        async function renderUserScore() {
+            const data = await getUserScore();
+            $('#userScore').html('');
+            if(data.userScore && data.quiz && data.userScore.length > 0) {
+                for (const score of data.userScore) {
+                    const quizInfo = data.quiz.find(q => q.id == score.quizId);
+                    $('#userScore').append(`
+                        <tr>
+                            <td>${quizInfo.titulo}</td>
+                            <td>${score.porcentagemAcertos}%</td>
+                            <td>${new Date(score.ultimaVezRespondido).toLocaleDateString()}</td>
+                        </tr>
+                    `);
+                }
+            } 
         }
 
         $('#formAlterPassword').on('submit', function(e) {
@@ -141,7 +182,7 @@
                             $('#editPasswordMessage').html(`<p style="color: red">${data}</p>`);
                         }
                     },
-                    error: (xhr, textStatus, errorThrown) => {
+                    error: (xhr) => {
                         $('#editPasswordMessage').html(`<p style="color: red">Error: ${xhr.responseText}</p>`);
                     },
                 });   
@@ -163,11 +204,11 @@
                         $('#modalEditUser').modal('toggle'); 
                         $(this).trigger("reset");
                     } else {
-                        $('#editUserMessage').html(`<p style="color: red">${data}</p>`);
+                        $('#editUserMessage').html(`<p class="text-danger mb-3">${data}</p>`);
                     }
                 },
                 error: (xhr, textStatus, errorThrown) => {
-                    $('#editUserMessage').html(`Error: ${textStatus}`);
+                    $('#editUserMessage').html(`<p class="text-danger mb-3">Error: ${xhr.responseText}</p>`);
                 },
             });
         });

@@ -25,10 +25,10 @@
 
                 <form id="formEditQuiz">
                     <label for="titulo">Título do quiz:</label><br>
-                    <input class="form-control" type="text" name="titulo" id="titulo" value="<?php echo htmlspecialchars($quiz->titulo); ?>">
+                    <input class="form-control" type="text" name="titulo" id="titulo">
 
                     <label for="descricao" class="mt-3">Descrição do quiz:</label><br>
-                    <input class="form-control" type="text" name="descricao" id="descricao" value="<?php echo htmlspecialchars($quiz->descricao); ?>">
+                    <input class="form-control" type="text" name="descricao" id="descricao">
 
                     <button type="submit" class="btn btn-secondary mt-3">Salvar Alterações</button>
                 </form>
@@ -50,6 +50,7 @@
 
     $(document).ready(() => {
         getAllQuestions();
+        renderQuizData();
     });
 
     $("#btnNovaPergunta").on('click', () => {
@@ -72,10 +73,31 @@
                 }
             },
             error: (xhr) => {
-                $('#mensagem').html(`<p style="color: red">${xhr.responseText}</p>`);
+                $('#mensagem').html(`<p style="color: red">Erro: ${xhr.responseText}</p>`);
+                renderQuizData();
             }
         })
     })
+
+    async function renderQuizData() {
+        const quizData = await getQuizData();
+        if(quizData) {
+            $('#titulo').val(`${quizData.titulo}`);
+            $('#descricao').val(`${quizData.descricao}`);
+        } else {
+            $('#mensagem').html(`<p style="color: red">Erro ao consultar quiz!</p>`);
+        }
+    }
+
+    async function getQuizData() {
+        try {
+            const response = await $.get('/quiz/show/<?php echo $quiz->id; ?>');
+            return response || '';
+        } catch(error) {
+            console.error('Erro ao capturar informação do quiz: ', error);
+            return '';
+        }
+    }
 
     function addNewQuestion() {
         const novoFormulario = `

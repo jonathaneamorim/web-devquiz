@@ -35,10 +35,55 @@ class UserController {
                     'email' => $user->email
                 ];
                 header('Content-Type: application/json');
+                http_response_code(200);
                 echo json_encode($userData);
+                exit;
             }
         } catch(Exception $e) {
             error_log('Erro ao capturar dados do usuário! - ' . $e->getMessage());
+            http_response_code(500);
+            echo 'Erro ao capturar dados do usuário!';
+            exit;
+        }
+    }
+
+    public function getScoreByUser() {
+        try {
+            $userId = get_session()['id'];
+            $userScores = $this->user->getUserScore($userId); // deve retornar vários scores
+    
+            if ($userScores && count($userScores) > 0) {
+                $quizIds = [];
+                $quizzes = [];
+    
+                foreach ($userScores as $score) {
+                    if (!in_array($score->quizId, $quizIds)) {
+                        $quiz = $this->quiz->getQuizById($score->quizId);
+                        if ($quiz) {
+                            $quizzes[] = $quiz;
+                            $quizIds[] = $score->quizId;
+                        }
+                    }
+                }
+    
+                $response = [
+                    'userScore' => $userScores,
+                    'quiz' => $quizzes
+                ];
+    
+                header('Content-Type: application/json');
+                http_response_code(200);
+                echo json_encode($response);
+                exit;
+            } else {
+                http_response_code(204);
+                exit;
+            }
+        } catch(Exception $e) {
+            error_log('Erro ao capturar score do usuário! - ' . $e->getMessage());
+            http_response_code(500);
+            echo 'Erro ao capturar dados do usuário!';
+            exit;
         }
     }
 
@@ -48,6 +93,22 @@ class UserController {
                 $userId = get_session()['id'];
                 $nome = $_POST['nome'];
                 $email = $_POST['email'];
+
+                $nameRegex = '/^.{5,}$/';
+
+                // https://www.php.net/manual/en/function.preg-match.php 
+                if(!preg_match($nameRegex, $nome)) {
+                    echo 'O nome precisa ter 5 caracteres ou mais!';
+                    http_response_code(400);
+                    exit;
+                }
+
+                // https://www.php.net/manual/pt_BR/function.filter-var.php 
+                if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                    echo 'Email com formato inválido!';
+                    http_response_code(400);
+                    exit;
+                }
                 
                 $currentUserData = $this->user->findById($userId);
     
@@ -85,30 +146,52 @@ class UserController {
         try {
             if($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $userId = get_session()['id'];
+                $currentPassword = trim($_POST['currentPassword']);
+                $newPassword = trim($_POST['newPassword']);
+                
                 $userFound = $this->user->findById($userId);
-                $currentPassword = $_POST['currentPassword'];
-                $newPassword = password_hash($_POST['newPassword'], PASSWORD_DEFAULT);
-                if(password_verify($currentPassword, $userFound->senha))  {
-                    $updatePassword = $this->user->updatePassword($userId, $newPassword);
-                    if($updatePassword) {
-                        http_response_code(200);
-                        echo 'Senha atualizada!';
-                        exit;
-                    } else {
-                        http_response_code(400);
-                        echo 'Erro ao atualizar senha!';
-                        exit;
-                    }
-                } else {
+
+                if(!password_verify($currentPassword, $userFound->senha))  {
                     http_response_code(403);
                     echo 'Senha atual incorreta!';
                     exit;
                 }
+                
+                if(password_verify($newPassword, $userFound->senha)) {
+                    http_response_code(403);
+                    echo 'A nova senha não pode ser igual a senha antiga!';
+                    exit;
+                }
+                
+                $passwordRegex = "/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/";
+                // (?=.*[a-z]) - pelo menos uma letra minúscula
+                // (?=.*[A-Z]) - pelo menos uma letra maiúscula
+                // (?=.*\d) - pelo menos um número
+                // (?=.*[\W_]) - pelo menos um caractere especial (qualquer símbolo que não seja letra ou número)
+                // .{8,} - mínimo de 8 caracteres
+                if(!preg_match($passwordRegex, $newPassword)) {
+                    http_response_code(403);
+                    echo 'A senha deve conter letra minúscula e maiúscula, número, caractere especial e deve conter 8 caracteres ou mais';
+                    exit;
+                }
+
+                $newPassword = password_hash($newPassword, PASSWORD_DEFAULT);
+
+                $updatePassword = $this->user->updatePassword($userId, $newPassword);
+                if($updatePassword) {
+                    http_response_code(200);
+                    echo 'Senha atualizada!';
+                    exit;
+                } else {
+                    http_response_code(400);
+                    echo 'Erro ao atualizar senha!';
+                    exit;
+                }
             }
         } catch(Exception $e) {
-            error_log('Erro ao capturar quizzes desse administrador! ' . $e->getMessage());
-            http_response_code(400);
-            echo 'Erro interno do servidor! - ' . $e->getMessage();
+            error_log('Erro ao atualizar senha: ' . $e->getMessage());
+            http_response_code(500);
+            echo 'Erro interno do servidor!';
             exit;
         }
     }

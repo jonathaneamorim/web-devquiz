@@ -88,6 +88,9 @@ if ($uri === '/') {
 }elseif ($uri === '/perfil/edit/password') {
     $userController->updatePassword();
 
+} elseif ($uri === '/perfil/userscore') {
+    $userController->getScoreByUser();
+
 } elseif ($uri === '/logout') {
     $authController->logout();
 

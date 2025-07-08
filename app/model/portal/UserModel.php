@@ -4,6 +4,7 @@ require_once __DIR__ . '/../Database.php';
 
 class UserModel {
     private $userTable = 'usuario';
+    private $scoreTable = 'tabelaPontuacao';
     private $db;
 
     public function __construct() {
@@ -75,15 +76,14 @@ class UserModel {
         }
     }
 
-    // // Atualiza uma tarefa
-    // public function updateTask($id, $title, $description) {
-    //     $stmt = $this->db->prepare("UPDATE tasks SET title = ?, description = ? WHERE id = ?");
-    //     return $stmt->execute([$title, $description, $id]);
-    // }
-
-    // // Deleta uma tarefa
-    // public function deleteTask($id) {
-    //     $stmt = $this->db->prepare("DELETE FROM tasks WHERE id = ?");
-    //     return $stmt->execute([$id]);
-    // }
+    public function getUserScore($userId) {
+        try {
+            $stmt = $this->db->prepare("SELECT * FROM $this->scoreTable WHERE usuarioId = :userId");
+            $stmt->bindParam(':userId', $userId);
+            $stmt->execute();
+            return $stmt->fetchAll();
+        } catch (PDOException $e) {
+            error_log('Erro ao capturar informações de pontuação de usuário: '. $e->getMessage());
+        }
+    }
 }
