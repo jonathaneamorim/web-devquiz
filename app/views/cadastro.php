@@ -1,7 +1,5 @@
 <?php 
     include_once __DIR__ . '/commons/default.php';
-
-    // https://www.w3schools.com/jsref/event_onfocusin.asp 
 ?>
 
 <!DOCTYPE html>
@@ -36,7 +34,7 @@
     </div>
     
     <script>
-        // Funções this não possuem o proprio this
+        // Arrows Functions não possuem o proprio this
         $("#formCadastro").on('submit', function (e) {
             e.preventDefault();
             const form = $(this);

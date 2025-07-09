@@ -11,7 +11,6 @@ class UserModel {
         $this->db = (new Database())->connect();
     }
 
-    // Retorna todas as tarefas
     public function addNewUser($nome, $email, $senha) {
         try {
             $stmt = $this->db->prepare("INSERT INTO $this->userTable (id, nome, email, senha) VALUES (UUID(), :nome, :email, :senha)");
@@ -20,7 +19,6 @@ class UserModel {
             $stmt->bindParam(':senha', $senha);
             return $stmt->execute();
         } catch (PDOException $e) {
-            // Exibe ou registra o erro
             echo "Erro ao inserir usuário: " . $e->getMessage();
         }
     }
@@ -30,9 +28,7 @@ class UserModel {
             $stmt = $this->db->prepare("SELECT * FROM $this->userTable WHERE id = :id");
             $stmt->bindParam(':id', $id);
             $stmt->execute();
-    
             return $stmt->fetch();
-
         } catch(PDOException $e) {
             error_log('Erro em ao encontrar usuário: ' . $e->getMessage());
             return false;
@@ -44,7 +40,6 @@ class UserModel {
             $stmt = $this->db->prepare("SELECT * FROM $this->userTable WHERE email = :email");
             $stmt->bindParam(':email', $email);
             $stmt->execute();
-
             return $stmt->fetch();
         } catch (PDOException $e) {
             error_log('Erro ao encontrar usuário por email: '. $e->getMessage());

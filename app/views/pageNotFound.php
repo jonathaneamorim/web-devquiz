@@ -8,8 +8,10 @@
 <body>
     <?php echo get_header(); ?>
 
-    <div>
+    <div class="w-100 h-75 d-flex align-items-center justify-content-center">
         <h2>Sorry, page not found!</h2>
     </div>
+
+    <?php echo get_scripts(); ?>
 </body>
 </html>

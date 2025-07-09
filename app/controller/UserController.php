@@ -50,7 +50,7 @@ class UserController {
     public function getScoreByUser() {
         try {
             $userId = get_session()['id'];
-            $userScores = $this->user->getUserScore($userId); // deve retornar vários scores
+            $userScores = $this->user->getUserScore($userId);
     
             if ($userScores && count($userScores) > 0) {
                 $quizIds = [];
@@ -96,14 +96,12 @@ class UserController {
 
                 $nameRegex = '/^.{5,}$/';
 
-                // https://www.php.net/manual/en/function.preg-match.php 
                 if(!preg_match($nameRegex, $nome)) {
                     echo 'O nome precisa ter 5 caracteres ou mais!';
                     http_response_code(400);
                     exit;
                 }
 
-                // https://www.php.net/manual/pt_BR/function.filter-var.php 
                 if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
                     echo 'Email com formato inválido!';
                     http_response_code(400);
@@ -169,6 +167,7 @@ class UserController {
                 // (?=.*\d) - pelo menos um número
                 // (?=.*[\W_]) - pelo menos um caractere especial (qualquer símbolo que não seja letra ou número)
                 // .{8,} - mínimo de 8 caracteres
+                
                 if(!preg_match($passwordRegex, $newPassword)) {
                     http_response_code(403);
                     echo 'A senha deve conter letra minúscula e maiúscula, número, caractere especial e deve conter 8 caracteres ou mais';

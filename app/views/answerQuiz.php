@@ -38,15 +38,13 @@
             const questions = await getQuestions();
             let content = '';
 
-            // Render quiz data
             if(quizData) {
                 $('#quizTitle').html(quizData.titulo);
                 $('#quizDescription').html(quizData.descricao);
             } else {
                 $('#mensagem').html('<p style="color: red">Erro ao capturar informações do quiz!</p>')
             }
-            
-            // Render quiz Questions
+
             if(questions) {
                 const shuffledQuestions = shuffle(questions);
                 for (const question of shuffledQuestions) {
@@ -97,7 +95,6 @@
             };
 
             $('#questions > div').each(function () {
-                // https://api.jquery.com/find/ 
                 const questionId = $(this).find('h3').attr('id');
                 const selectedAnswerId = $(this).find('select[name="resposta"]').val();
 
@@ -133,13 +130,8 @@
             
         })
 
-        // Embaralhador de array
-        // Fonte: https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
         function shuffle(array) {
-            // Docs spread - Espalhar itens de um array ou objeto (combinar, copiar, passar valores individualmente)
-            // https://developer.mozilla.org/pt-BR/docs/Web/JavaScript/Reference/Operators/Spread_syntax
             const newArray = [...array];
-            // o -1 se dá ao fato do length nao considerar o 0
             for (let i = newArray.length - 1; i > 0; i--) {
                 // Acha um numero aleatorio dentro do intervalo do array
                 const j = Math.floor(Math.random() * (i + 1));

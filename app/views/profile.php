@@ -1,21 +1,6 @@
 <?php 
     include_once __DIR__ . '/commons/default.php';
     include_once __DIR__ . '/../utils/helpers.php';
-
-    // https://pt.stackoverflow.com/questions/103157/qual-%C3%A9-a-diferen%C3%A7a-entre-x-www-form-urlencoded-e-form-data
-    // https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Methods/POST
-    // Tipos de corpos de requisição application/x-www-form-urlencoded | multipart/form-data
-    // application/x-www-form-urlencoded = campo1=valor1&campo2=valor2
-    // multipart/form-data = Enviar arquivos + dados
-    // Pesquisar
-
-     // Criar um update pro usuario
-    /*
-        Fontes: https://api.jquery.com/serialize/
-    */
-
-    // https://stackoverflow.com/questions/16493280/close-bootstrap-modal
-    // https://stackoverflow.com/questions/6653556/jquery-javascript-function-to-clear-all-the-fields-of-a-form
 ?>
 
 <!DOCTYPE html>

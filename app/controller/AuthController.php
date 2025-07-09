@@ -27,7 +27,6 @@ class AuthController {
             $userFound = $this->model->findUserByEmail($email);
     
             if ($userFound) {
-                // https://www.php.net/manual/en/function.password-verify.php
                 if(password_verify($senha, $userFound->senha)) {
                     $_SESSION['usuario'] = [
                         'id' => $userFound->id,
@@ -68,14 +67,12 @@ class AuthController {
 
             $nameRegex = '/^.{5,}$/';
 
-            // https://www.php.net/manual/en/function.preg-match.php 
             if(!preg_match($nameRegex, $nome)) {
                 echo 'O nome precisa ter 5 caracteres ou mais!';
                 http_response_code(400);
                 exit;
             }
 
-            // https://www.php.net/manual/pt_BR/function.filter-var.php 
             if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
                 echo 'Email com formato inválido!';
                 http_response_code(400);

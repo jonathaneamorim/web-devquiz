@@ -1,8 +1,5 @@
 <?php 
     include_once __DIR__ . '/commons/default.php';
-
-    // Criar toasts de feedback pro usuário
-    // Aparece e some depois de x segundos
 ?>
 
 <!DOCTYPE html>
@@ -211,9 +208,6 @@
     }
 
     $(document).on('click', '.btn-save-question', function (e) {
-        // https://developer.mozilla.org/en-US/docs/Web/API/Element/closest
-        // Método de Element que percorre o elemento e seus pais (indo em direção a raiz)
-        // até encontrar uma correspondencia
         const form = $(this).closest('.pergunta-bloco');
         const questionId = form.find('input[name="question_id"]').val() || '';
         const isEdit = questionId ? true : false;
@@ -251,7 +245,6 @@
         }
 
         $.ajax({
-            // https://www.php.net/manual/en/function.htmlspecialchars.php 
             url: '/quiz/edit/questions/<?php echo htmlspecialchars($quiz->id) ?>',
             type: isEdit ? 'PUT' : 'POST',
             data: isEdit ? putData : postData,
