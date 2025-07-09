@@ -1,8 +1,5 @@
 <?php 
     include_once __DIR__ . '/commons/default.php';
-
-    // Criar toasts de feedback pro usuário
-    // Aparece e some depois de x segundos
 ?>
 
 <!DOCTYPE html>
@@ -25,10 +22,10 @@
 
                 <form id="formEditQuiz">
                     <label for="titulo">Título do quiz:</label><br>
-                    <input class="form-control" type="text" name="titulo" id="titulo" value="<?php echo htmlspecialchars($quiz->titulo); ?>">
+                    <input class="form-control" type="text" name="titulo" id="titulo">
 
                     <label for="descricao" class="mt-3">Descrição do quiz:</label><br>
-                    <input class="form-control" type="text" name="descricao" id="descricao" value="<?php echo htmlspecialchars($quiz->descricao); ?>">
+                    <input class="form-control" type="text" name="descricao" id="descricao">
 
                     <button type="submit" class="btn btn-secondary mt-3">Salvar Alterações</button>
                 </form>
@@ -50,6 +47,7 @@
 
     $(document).ready(() => {
         getAllQuestions();
+        renderQuizData();
     });
 
     $("#btnNovaPergunta").on('click', () => {
@@ -72,10 +70,31 @@
                 }
             },
             error: (xhr) => {
-                $('#mensagem').html(`<p style="color: red">${xhr.responseText}</p>`);
+                $('#mensagem').html(`<p style="color: red">Erro: ${xhr.responseText}</p>`);
+                renderQuizData();
             }
         })
     })
+
+    async function renderQuizData() {
+        const quizData = await getQuizData();
+        if(quizData) {
+            $('#titulo').val(`${quizData.titulo}`);
+            $('#descricao').val(`${quizData.descricao}`);
+        } else {
+            $('#mensagem').html(`<p style="color: red">Erro ao consultar quiz!</p>`);
+        }
+    }
+
+    async function getQuizData() {
+        try {
+            const response = await $.get('/quiz/show/<?php echo $quiz->id; ?>');
+            return response || '';
+        } catch(error) {
+            console.error('Erro ao capturar informação do quiz: ', error);
+            return '';
+        }
+    }
 
     function addNewQuestion() {
         const novoFormulario = `
@@ -189,9 +208,6 @@
     }
 
     $(document).on('click', '.btn-save-question', function (e) {
-        // https://developer.mozilla.org/en-US/docs/Web/API/Element/closest
-        // Método de Element que percorre o elemento e seus pais (indo em direção a raiz)
-        // até encontrar uma correspondencia
         const form = $(this).closest('.pergunta-bloco');
         const questionId = form.find('input[name="question_id"]').val() || '';
         const isEdit = questionId ? true : false;
@@ -229,7 +245,6 @@
         }
 
         $.ajax({
-            // https://www.php.net/manual/en/function.htmlspecialchars.php 
             url: '/quiz/edit/questions/<?php echo htmlspecialchars($quiz->id) ?>',
             type: isEdit ? 'PUT' : 'POST',
             data: isEdit ? putData : postData,

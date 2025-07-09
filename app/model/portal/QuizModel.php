@@ -2,8 +2,6 @@
 
 require_once __DIR__ . '/../Database.php';
 
-// stmt = statement ou declaração
-
 class QuizModel {
     
     protected $quizTable = 'quiz';
@@ -22,11 +20,6 @@ class QuizModel {
             $stmt->bindParam(':titulo', $titulo);
             $stmt->bindParam(':descricao', $descricao);
             $stmt->bindParam(':userId', $userId);
-            
-            // verifica se o retorno da criação é true ou false
-            // se for true retorna o ultimo id adicionado, nesse caso o valor adicionado
-            // caso contrario retorna false
-            // https://www.php.net/manual/pt_BR/pdo.lastinsertid.php
             return $stmt->execute() ? $this->db->lastInsertId() : false;
 
         } catch(PDOException $e) {
@@ -59,9 +52,6 @@ class QuizModel {
             return $insertedIds;
         } catch(PDOException $e) {
             error_log('Erro ao inserir novas respostas: '. $e->getMessage());
-            // De acordo com pesquisas, o return false evitará ambiguidade no caso de retornar null
-            // Null a lista ou null a execução?
-            // https://www.reddit.com/r/PHPhelp/comments/p1by7y/best_practice_for_returning_a_false_value_from_a/
             return false;
         }
     }
@@ -218,4 +208,5 @@ class QuizModel {
             return false;
         }
     }
+    
 }

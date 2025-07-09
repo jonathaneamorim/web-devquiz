@@ -4,11 +4,6 @@ require_once __DIR__ . '/../model/portal/UserModel.php';
 require_once __DIR__ . '/../model/portal/QuizModel.php';
 require_once __DIR__ . '/../utils/helpers.php';
 
-// Criar um método para retornar o http_response_code e o codigo
-// Esse método vai receber o codigo e o que vai retornar e vai aplicar as duas e dar um exit no final
-// Aproitando que ele ja vai estar ali e colocar um log junto
-// Fazer validações caso ele seja 200, 201, 400 ou 500
-
 class QuizController {
 
     private $quiz;
@@ -40,9 +35,17 @@ class QuizController {
             try {
                 $titulo = $_POST['titulo'];
                 $descricao = $_POST['descricao'];
+
+                if(!$titulo || !$descricao) {
+                    http_response_code(400);
+                    echo 'Titulo ou descrições vazias!';
+                    exit;
+                }
+
                 $userId = get_session()['id'];
     
                 $newQuizId = $this->quiz->newQuiz($titulo, $descricao, $userId);
+                
                 if($newQuizId) {
                     http_response_code(201);
                     $response = [
@@ -72,6 +75,7 @@ class QuizController {
                 header('Content-Type: application/json');
                 http_response_code(200);
                 echo json_encode($quizzes);
+                exit;
             }
         } catch(Exception $e) {
             error_log('Erro ao capturar quizzes!: ' . $e);
@@ -85,25 +89,18 @@ class QuizController {
                 header('Content-Type: application/json');
                 http_response_code(200);
                 echo json_encode($quiz);
+                exit;
             } else {
                 http_response_code(204);
+                exit;
             }
         } catch(Exception $e) {
             error_log('Erro ao capturar quizzes!: ' . $e);
+            http_response_code(400);
+            echo 'Erro interno do servidor';
+            die;
         }
     }
-
-    // public function getlistquizByUser() {
-    //     try {
-    //         $quizzes = $this->quiz->getQuizzesByUser(get_session()->id);
-    //         if($quizzes) {
-    //             header('Content-Type: application/json');
-    //             echo json_encode($quizzes);
-    //         }
-    //     } catch(Exception $e) {
-    //         error_log('Erro ao capturar quizzes desse administrador! ' . $e);
-    //     }
-    // }
 
     public function editQuestion($quizId) {
         
@@ -135,13 +132,10 @@ class QuizController {
                 $insertedAnswersIds = $this->quiz->newAnswers($answers, $newQuestionId);
 
                 if($insertedAnswersIds)  {
-                    // https://www.php.net/manual/pt_BR/function.strtolower.php
-                    // Garantir que a letra será minuscula
                     $letra = strtolower($correctAnswerId);
                     $map = ['a' => 0, 'b' => 1, 'c' => 2, 'd' => 3];
                     
                     if (isset($map[$letra])) {
-                        // Captura o id da resposta correta a partir do mapeamento
                         $respostaCorretaId = $insertedAnswersIds[$map[$letra]];
                         $setCorrectAnswer = $this->quiz->setCorrectAnswer($newQuestionId, $respostaCorretaId);
                         
@@ -174,21 +168,16 @@ class QuizController {
 
         if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
             try {
-                // Get data put method: https://www.sitepoint.com/community/t/put-method/41476/4
                 parse_str(file_get_contents("php://input"),$put_vars);
                 $questId = $put_vars['questionId'];
                 $questionText = $put_vars['questionText'];
-                $answer1 = $put_vars['answer1'];
-                $answer2 = $put_vars['answer2'];
-                $answer3 = $put_vars['answer3'];
-                $answer4 = $put_vars['answer4'];
-                $answers = [
-                    $answer1 ,
-                    $answer2 ,
-                    $answer3 ,
-                    $answer4 
-                ];
                 $correctAnswerId = $put_vars['correctAnswer'];
+                $answers = [
+                    $put_vars['answer1'] ,
+                    $put_vars['answer2'] ,
+                    $put_vars['answer3'] ,
+                    $put_vars['answer4']
+                ];
 
                 $currentQuestion = $this->quiz->getQuestionById($questId);
 
@@ -254,6 +243,13 @@ class QuizController {
             try {
                 $titulo = $put_vars['titulo'];
                 $descricao = $put_vars['descricao'];
+
+                if(!$titulo || !$descricao) {
+                    http_response_code(400);
+                    echo 'Titulo ou descrições vazias!';
+                    exit;
+                }
+
                 $currentQuiz = $this->quiz->getQuizById($quizId);
                 if(
                     !($titulo === $currentQuiz->titulo) ||
@@ -267,6 +263,7 @@ class QuizController {
                     } else {
                         http_response_code(400);
                         echo 'Erro ao atualizar quiz!';
+                        exit;
                     }
                 }
             } catch(Exception $e) {
@@ -283,15 +280,18 @@ class QuizController {
                 if($deleted) {
                     http_response_code(200);
                     echo 'Quiz deletado com sucesso!';
+                    exit;
                 }
             } catch(Exception $e) {
                 error_log('Erro ao remover quiz!: ' . $e);
+                http_response_code(500);
+                echo 'Erro no servidor ao deletar!';
+                exit;
             }
         }
 
     }
 
-    // Mudar o nome disso kkkk
     public function getQuestions($quizId) {
         if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             try {
@@ -352,21 +352,6 @@ class QuizController {
         }
     }
 
-    // public function delete($id) {
-    //     if ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
-    //         try {
-    //             $deleted = $this->quiz->deleteQuiz($id);
-    //             if($deleted) {
-    //                 http_response_code(200);
-    //                 echo 'Quiz deletado com sucesso!';
-    //             }
-    //         } catch(Exception $e) {
-    //             error_log('Erro ao remover quiz!: ' . $e);
-    //         }
-    //     }
-    // }
-
-
     public function answerQuiz($quizId) {
         if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             if(!is_logged()) {
@@ -387,7 +372,6 @@ class QuizController {
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             try {
-                // https://www.php.net/manual/en/function.file-get-contents.php
                 $data = json_decode(file_get_contents("php://input"));
                 // Verificar integridade dos dados
                 if (!$data || !isset($data->quizId) || !isset($data->respostas)) {
@@ -409,6 +393,8 @@ class QuizController {
                 }
                 
                 $percentage = ($userScore / $totalQuestions) * 100;
+
+                $percentage = number_format($percentage, 2);
                 
                 $userId = get_session()['id'];
 

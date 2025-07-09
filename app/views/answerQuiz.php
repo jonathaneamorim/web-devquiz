@@ -13,17 +13,17 @@
             <h2 id="quizTitle"></h2>
             <p id="quizDescription"></p>
         </div>
+        <a href="#finish" class="btn btn-primary">Finalizar quiz</a>
     </section>
 
     <div id="mensagem"></div>
 
-    <div id="questions" class="d-flex flex-column w-100 align-items-center">
+    <div id="questions" class="d-flex flex-column w-100 align-items-center"></div>
 
-    </div>
-
-    <div class="d-flex m-3 justify-content-center">
+    <div class="d-flex m-5 justify-content-center">
         <button id="finish" class="btn btn-primary">Finalizar e enviar</button>
     </div>
+
     
     <script> 
 
@@ -38,17 +38,16 @@
             const questions = await getQuestions();
             let content = '';
 
-            // Render quiz data
             if(quizData) {
                 $('#quizTitle').html(quizData.titulo);
                 $('#quizDescription').html(quizData.descricao);
             } else {
                 $('#mensagem').html('<p style="color: red">Erro ao capturar informações do quiz!</p>')
             }
-            
-            // Render quiz Questions
+
             if(questions) {
-                for (const question of questions) {
+                const shuffledQuestions = shuffle(questions);
+                for (const question of shuffledQuestions) {
                     const answers = await getAnswers(question.id);
                     let answersContent = '';
                     let selectContent = '';
@@ -70,7 +69,7 @@
                     }
 
                     content += `
-                        <div class="w-50 p-3 border border-dark rounded-5 p-3">
+                        <div class="w-50 p-3 border border-dark rounded-5 p-3 mb-5">
                             <h3 id="${question.id}">${question.texto}</h3>
 
                             <div>
@@ -96,7 +95,6 @@
             };
 
             $('#questions > div').each(function () {
-                // https://api.jquery.com/find/ 
                 const questionId = $(this).find('h3').attr('id');
                 const selectedAnswerId = $(this).find('select[name="resposta"]').val();
 
@@ -132,13 +130,8 @@
             
         })
 
-        // Embaralhador de array
-        // Fonte: https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
         function shuffle(array) {
-            // Docs spread - Espalhar itens de um array ou objeto (combinar, copiar, passar valores individualmente)
-            // https://developer.mozilla.org/pt-BR/docs/Web/JavaScript/Reference/Operators/Spread_syntax
             const newArray = [...array];
-            // o -1 se dá ao fato do length nao considerar o 0
             for (let i = newArray.length - 1; i > 0; i--) {
                 // Acha um numero aleatorio dentro do intervalo do array
                 const j = Math.floor(Math.random() * (i + 1));

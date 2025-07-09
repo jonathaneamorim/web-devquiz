@@ -1,32 +1,6 @@
 <?php 
     include_once __DIR__ . '/commons/default.php';
     include_once __DIR__ . '/../utils/helpers.php';
-
-
-    /*
-        Fontes: 
-            https://stackoverflow.com/questions/7638847/understanding-jquerys-jqxhr
-            https://www.sitepoint.com/jqxhr-object/
-            https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/isArray
-        data: resposta do servidor
-        textStatus: string com o status ("success" ou "error")
-        xhr: objeto XMLHttpRequest com status, headers, etc.
-    */
-
-    /*
-        beforeSend: function (xhr) {
-        console.log('Loading more posts...')
-        button.text('Loading');
-    }
-    */
-    
-    /*
-        xhr: objeto XMLHttpRequest
-        textStatus: string com o tipo do erro ("timeout", "error", "abort", etc)
-        errorThrown: mensagem do erro (string ou null) - Exceção tratada
-    */
-
-    // Adicionar verificação para deletar quiz (tem certeza que deseja deletar quiz?)
 ?>
 
 <!DOCTYPE html>
@@ -134,7 +108,6 @@
                 }
             }
 
-            // https://www.w3schools.com/tags/att_data-.asp 
             $(document).on('click', '.btn-delete', function () {
                 const id = $(this).attr('data-id');
                 $.ajax({
